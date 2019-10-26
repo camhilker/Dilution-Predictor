@@ -1,0 +1,181 @@
+---
+title: "Dilution Finder ver. 1.2"
+output: html_notebook
+runtime: shiny
+---
+```{r}
+#If needed install Plotly and Shiny
+install.packages(c("plotly", "shiny"))
+```
+```{r}
+#Best Version using Plotly
+library(shiny)
+library(plotly)
+
+labData <- read.table("/Users/CamelliaHilker/Desktop/Dilution Finder/MockNLData.csv", header=TRUE, sep=",")
+
+#convert '<10' and '<20' results
+labData$ModResult <- labData$Result
+levels(labData$ModResult)[levels(labData$ModResult)=="<10"] <- "0"
+levels(labData$ModResult)[levels(labData$ModResult)=="<20"] <- "0"
+
+#function for mode
+getMode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+#create dilution column
+numResult <- as.numeric(levels(labData$ModResult))[labData$ModResult]
+logResult <- log10(numResult)
+logResult[logResult=="-Inf"]<-1
+logResult <- floor(logResult)
+labData$Dilution <- logResult
+
+ui <- fluidPage(
+  headerPanel("Dilution History"), 
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(inputId="client", label="Select Client Name", choices=levels(labData$Client.Name)
+      ),
+      selectInput(inputId="test", label="Select Test Code", choices=levels(labData$Analysis))
+      ),
+    mainPanel(
+      plotlyOutput("line"),
+  htmlOutput("info"))
+    )
+  )
+
+server <- function(input, output, session) {
+#selected client into data frame
+selDF <- reactive({labData[labData[,1]==input$client,]
+  })
+
+#selected test code into data frame
+subsetDF <- reactive({selDF()[selDF()[,5]==input$test,]
+  })
+
+#update second menu based on first selection
+observe({
+    x <- selDF()$Analysis
+
+    # Can use character(0) to remove all choices
+    if (is.null(x))
+      x <- character(0)
+
+    # Can also set the label and select items
+    updateSelectInput(session, "test",
+      label = paste("Select input label", length(x)),
+      choices = x,
+      selected = tail(x, 1)
+    )
+  })
+
+#points to be plotted
+points <- reactive({as.numeric(levels(subsetDF()$ModResult))[subsetDF()$ModResult]
+  })
+
+#axis labels
+f <- list(
+  family = "Courier New, monospace",
+  size = 18,
+  color = "#7f7f7f"
+)
+x <- list(
+  title = "Index",
+  titlefont = f
+)
+y <- list(
+  title = "Result",
+  titlefont = f
+)
+
+#plot
+  output$line <- renderPlotly({
+    req(input$test, input$client, cancelOutput=TRUE)
+    plot_ly(subsetDF(), x=seq_along(points()), y=points(), type="scatter", text=paste("Result:", subsetDF()$Result, '<br>Product ID:', subsetDF()$Product.ID, '<br>Product Description:', subsetDF()$Product.Description, '<br>Date Received:', subsetDF()$Date), mode="markers", color=points()) %>% layout(xaxis = x, yaxis = y, title = paste(input$client, " Results for ", input$test))
+  })
+
+#Info box for dilution selection
+  output$info <- renderUI({
+    reactTxt <- paste("The result for ", input$client, "--", input$test, " is usually read on the ", getMode(subsetDF()$Dilution), " dilution.") 
+    staticTxt <- paste("Please note additional information contained in non-zero points on graph for items that may require higher dilutions.")
+    HTML(paste('<br/><h4>', reactTxt, staticTxt, '</h4>', sep='<br/><br/>'))
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+```{r}
+#Version using ggplot
+library(shiny)
+library(scales)
+library(ggplot2)
+
+labData <- read.table("/Users/CamelliaHilker/Desktop/MockNLData.csv", header=TRUE, sep=",")
+
+#convert '<10' and '<20' results
+labData$ModResult <- labData$Result
+levels(labData$ModResult)[levels(labData$ModResult)=="<10"] <- "0"
+levels(labData$ModResult)[levels(labData$ModResult)=="<20"] <- "0"
+#convert results to scientific notation
+SciNotResult <- formatC(as.numeric(as.character(labData$ModResult)), format="e", digits=2)
+
+ui <- fluidPage(
+  headerPanel("Dilution History"), 
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(inputId="client", label="Select Client Name", choices=levels(labData$Client.Name)
+      ),
+      selectInput(inputId="test", label="Select Test Code", choices=levels(labData$Analysis))
+      ),
+    mainPanel(
+      plotOutput("line", hover="plot_hov"),
+  verbatimTextOutput("info"))
+    )
+  )
+
+server <- function(input, output, session) {
+#selected client into data frame
+selDF <- reactive({labData[labData[,1]==input$client,]
+  })
+
+#selected test code into data frame
+subsetDF <- reactive({selDF()[selDF()[,5]==input$test,]
+  })
+
+#update second menu based on first selection
+observe({
+    x <- selDF()$Analysis
+
+    # Can use character(0) to remove all choices
+    if (is.null(x))
+      x <- character(0)
+
+    # Can also set the label and select items
+    updateSelectInput(session, "test",
+      label = paste("Select input label", length(x)),
+      choices = x,
+      selected = tail(x, 1)
+    )
+  })
+
+#points to be plotted
+points <- reactive({as.numeric(levels(subsetDF()$ModResult))[subsetDF()$ModResult]
+  })
+
+#plot
+  output$line <- renderPlot({
+    qplot(seq_along(points()), points(), xlab ="Index", ylab ="Result") + geom_point() + labs(title=paste0(input$client, " Results for ", input$test))
+  })
+
+#hover information  
+  output$info <- renderText({
+    paste0("x=", input$plot_hov$x, "\ny=", input$plot_hov$y)
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
