@@ -14,14 +14,14 @@ Use of this app can reduce error in the plating step and reduce supply use by ta
 The included data file is mock data that I created to feed into the app.
 The example test codes refer to the following:
 
-_APCPFSWCMMEF_ - Standard aerobic plate count (using 3M petrifilm) for an environmental swab, as described by CMMEF*<br>
-APCPFSPCMMEF - Standard aerobic plate count (using 3M petrifilm) for an environmental sponge, as described by CMMEF<br>
-COLIPFSPCMMEF - Coliform plate count (using 3M petrifilm) for an environmental sponge, as described by CMMEF<br>
-LABPFCMMEF - Lactic acid bacterial count (using 3M petrifilm), as described by CMMEF<br>
-ENTBACPFCMMEF - Enterobacteriaceae plate count (using 3M petrifilm), as described by CMMEF<br>
-APCPFAOAC - Standard aerobic plate count (using 3M petrifilm), as described by AOAC*<br>
-COLIPFAOAC - Coliform plate count (using 3M petrifilm), as described by AOAC<br>
-STAPHAPFAOAC - Staphylococcus aureus plate count (using 3M petrifilm), as described by AOAC<br>
+__APCPFSWCMMEF__ - Standard aerobic plate count (using 3M petrifilm) for an environmental swab, as described by CMMEF*<br>
+__APCPFSPCMMEF__ - Standard aerobic plate count (using 3M petrifilm) for an environmental sponge, as described by CMMEF<br>
+__COLIPFSPCMMEF__ - Coliform plate count (using 3M petrifilm) for an environmental sponge, as described by CMMEF<br>
+__LABPFCMMEF__ - Lactic acid bacterial count (using 3M petrifilm), as described by CMMEF<br>
+__ENTBACPFCMMEF__ - Enterobacteriaceae plate count (using 3M petrifilm), as described by CMMEF<br>
+__APCPFAOAC__ - Standard aerobic plate count (using 3M petrifilm), as described by AOAC*<br>
+__COLIPFAOAC__ - Coliform plate count (using 3M petrifilm), as described by AOAC<br>
+__STAPHAPFAOAC__ - Staphylococcus aureus plate count (using 3M petrifilm), as described by AOAC<br>
 <br><br>
 *CMMEF = Compendium Methods Microbiological Examination Foods<br>
 *AOAC = Association of Official Analytical Chemists
